@@ -1,0 +1,14 @@
+{% extends "layout.html" %} {% block content %}
+<div class="customform">
+  <div class="content">
+    <img src="{{ url_for('static',filename='images/logo.png')}}" />
+    <h2>Data Visualisation</h2>
+    {% with messages = get_flashed_messages(with_categories=true)%} {% if
+    messages %} {% for category, message in messages %}
+    <div class="predictionbox">
+      <h3>{{ message }}</h3>
+    </div>
+    {% endfor %} {% endif %} {% endwith %}
+  </div>
+</div>
+{% endblock %}

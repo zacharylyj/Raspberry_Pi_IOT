@@ -1,0 +1,40 @@
+{% extends "layout.html" %} {% block content %}
+<div class="customtable">
+  <img src="{{ url_for('static', filename='images/logo.png')}}" />
+  <br />
+  <h2>History</h2>
+  <div class="tablecontent">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Temperature</th>
+          <th>Time</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in entries %}
+        <tr>
+          <td>{{ entry.id }}</td>
+          <td>{{ entry.name }}</td>
+          <td>{{ entry.temperature }}</td>
+          <td>{{ entry.creation_time.strftime("%H:%M:%S %y-%m-%d") }}</td>
+          <td>
+            <form action="/remove" method="post">
+              <input type="hidden" name="id" value="{{ entry.id }}" />
+              <input
+                type="submit"
+                class="form-control btn-danger"
+                value="Remove"
+              />
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
