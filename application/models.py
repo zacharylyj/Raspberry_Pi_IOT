@@ -23,7 +23,7 @@ class Worker(db.Model):
 class History(db.Model):
     entry_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     worker_id = db.Column(db.Integer)
-    temperature = db.Column(db.Integer)
+    temperature = db.Column(db.Float)
     creation_time = db.Column(
         db.DateTime, default=lambda: datetime.utcnow() + timedelta(hours=8)
     )

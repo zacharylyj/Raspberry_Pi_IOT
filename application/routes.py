@@ -1,3 +1,4 @@
+import requests
 from application import app
 from application import db
 from application import login_manager
@@ -6,7 +7,7 @@ from application.models import User
 from application.models import History
 from application.models import Worker
 from application.forms import SignUpForm, SignInForm, ChangePasswordForm
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask_login import UserMixin, login_user, login_required, current_user, logout_user
 from flask import render_template, request, flash, url_for, redirect, jsonify
 from wtforms.validators import (
@@ -358,3 +359,60 @@ def delete_worker(worker_id):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+TELEGRAM_TOKEN = "6943504039:AAG0Hjeep3ScidPZ8yG361l7TQiP28e9mIU"
+TELEGRAM_URL = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+TELEGRAM_CHAT_ID = "-4121471505"
+
+# Assuming the class definitions for User, Worker, and History are already provided and in place
+
+
+def get_entries2():
+    today = datetime.utcnow().date()  # Adjust timezone if needed
+    try:
+        entries = (
+            db.session.query(
+                History.entry_id,
+                Worker.name,
+                History.temperature,
+                History.creation_time,
+            )
+            .outerjoin(Worker, Worker.id == History.worker_id)
+            .filter(History.temperature >= 37.8)
+            .filter(db.func.date(History.creation_time) == today)
+            .order_by(History.entry_id.desc())
+            .all()
+        )
+
+        formatted_entries = []
+        for entry in entries:
+            # Format time to only include hour, minute, and second
+            formatted_time = entry.creation_time.strftime("%H:%M:%S")
+            formatted_entries.append(
+                {
+                    "id": entry.entry_id,
+                    "name": entry.name if entry.name else "unknown",
+                    "temperature": entry.temperature,
+                    "creation_time": formatted_time,  # Using the formatted time
+                }
+            )
+        return formatted_entries
+    except Exception as e:
+        print(f"Database error: {e}")
+        return []
+
+
+@app.route("/notify_temperatures", methods=["GET"])
+def notify_temperatures():
+    entries = get_entries()
+    if entries:
+        message = "Today's High Temperature Alerts:\n"
+        for entry in entries:
+            message += f"ID: {entry['id']}, Name: {entry['name']}, Temp: {entry['temperature']}, Time: {entry['creation_time']}\n"
+    else:
+        message = "No high temperature records found for today."
+
+    data = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "HTML"}
+    response = requests.post(TELEGRAM_URL, data=data)
+    return {"success": response.status_code == 200}, 200
