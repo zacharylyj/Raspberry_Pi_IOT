@@ -1,14 +1,30 @@
 {% extends "layout.html" %} {% block content %}
-<div class="customform">
-  <div class="content">
-    <img src="{{ url_for('static',filename='images/logo.png')}}" />
-    <h2>Data Visualisation</h2>
-    {% with messages = get_flashed_messages(with_categories=true)%} {% if
-    messages %} {% for category, message in messages %}
-    <div class="predictionbox">
-      <h3>{{ message }}</h3>
-    </div>
-    {% endfor %} {% endif %} {% endwith %}
+<div class="customtable">
+  <img src="{{ url_for('static', filename='images/logo.png')}}" />
+  <br />
+  <h2>Today's Update</h2>
+  <div class="tablecontent">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Temperature</th>
+          <th>Creation Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in entries %}
+        <tr>
+          <td>{{ entry['id'] }}</td>
+          <td>{{ entry['name'] }}</td>
+          <td>{{ entry['temperature'] }}</td>
+          <td>{{ entry['creation_time'] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
+</div>
 </div>
 {% endblock %}

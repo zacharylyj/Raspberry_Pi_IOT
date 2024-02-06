@@ -88,12 +88,12 @@ def index_page():
         print(e)
         data = request.get_json()
         email = data["email"]
-        try:
-            db.session.commit()
-        except Exception as e:
-            flash(f"An error occurred: {e}")
-            return render_template("index.html", title="Home", user_email=email)
-    return render_template("index.html", title="Home", user_email=email)
+
+    entries = get_entries2()
+    print(entries)
+    return render_template(
+        "index.html", title="Home", user_email=email, entries=entries
+    )
 
 
 def get_label(form, field):
@@ -369,7 +369,8 @@ TELEGRAM_CHAT_ID = "-4121471505"
 
 
 def get_entries2():
-    today = datetime.utcnow().date()  # Adjust timezone if needed
+    # Adjust "today" to match the timezone used in your models
+    today = (datetime.utcnow() + timedelta(hours=8)).date()
     try:
         entries = (
             db.session.query(
@@ -394,7 +395,7 @@ def get_entries2():
                     "id": entry.entry_id,
                     "name": entry.name if entry.name else "unknown",
                     "temperature": entry.temperature,
-                    "creation_time": formatted_time,  # Using the formatted time
+                    "creation_time": formatted_time,
                 }
             )
         return formatted_entries
@@ -403,9 +404,24 @@ def get_entries2():
         return []
 
 
+def debug_get_entries():
+    try:
+        entries = db.session.query(
+            History
+        ).all()  # Simplify the query to fetch all entries
+        for entry in entries:
+            print(
+                entry.entry_id, entry.temperature, entry.creation_time
+            )  # Debug output
+        return entries
+    except Exception as e:
+        print(f"Debugging error: {e}")
+        return []
+
+
 @app.route("/notify_temperatures", methods=["GET"])
 def notify_temperatures():
-    entries = get_entries()
+    entries = get_entries2()
     if entries:
         message = "Today's High Temperature Alerts:\n"
         for entry in entries:
