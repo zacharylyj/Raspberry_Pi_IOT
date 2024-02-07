@@ -133,6 +133,7 @@ def get_entries():
                 Worker.name,
                 History.temperature,
                 History.creation_time,
+                History.image,  # Fetch the image data as well
             )
             .outerjoin(Worker, Worker.id == History.worker_id)
             .order_by(History.entry_id.desc())
@@ -147,6 +148,7 @@ def get_entries():
                     "name": entry.name if entry.name else "unknown",
                     "temperature": entry.temperature,
                     "creation_time": entry.creation_time,
+                    "image": entry.image if entry.image else "unknown",
                 }
             )
 
@@ -293,16 +295,27 @@ def api_delete_account(data=None):
 def add_worker_entry():
     if request.method == "POST":
         try:
-            data = request.json
-            worker_id = data.get("worker_id")
-            temperature = data.get("temperature")
+            # Assuming `worker_id` and `temperature` are sent as form data
+            worker_id = request.form.get("worker_id")
+            temperature = request.form.get("temperature")
+            image_file = request.files.get("image")
 
-            # Validating if both parameters are provided
-            if worker_id is None or temperature is None:
-                return jsonify({"error": "Missing worker_id or temperature"}), 400
+            # Validating if all parameters are provided
+            if worker_id is None or temperature is None or image_file is None:
+                return (
+                    jsonify({"error": "Missing worker_id, temperature, or image"}),
+                    400,
+                )
 
-            # Create a new History record (no need to check if worker exists)
-            new_history = History(worker_id=worker_id, temperature=temperature)
+            # Further validation to ensure the file is a PNG could be added here
+
+            # Read the binary content of the image
+            image_binary = image_file.read()
+
+            # Create a new History record
+            new_history = History(
+                worker_id=worker_id, temperature=temperature, image=image_binary
+            )
             db.session.add(new_history)
             db.session.commit()
 

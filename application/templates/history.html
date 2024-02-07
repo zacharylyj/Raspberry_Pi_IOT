@@ -11,6 +11,7 @@
           <th>Name</th>
           <th>Temperature</th>
           <th>Time</th>
+          <th>Face</th>
           <th>Delete</th>
         </tr>
       </thead>
@@ -21,6 +22,14 @@
           <td>{{ entry.name }}</td>
           <td>{{ entry.temperature }}</td>
           <td>{{ entry.creation_time.strftime("%H:%M:%S %y-%m-%d") }}</td>
+          <td>
+            {% if entry.image %}
+            <img
+              src="data:image/png;base64,{{ entry.image | b64encode }}"
+              height="100"
+            />
+            {% endif %}
+          </td>
           <td>
             <form action="/remove" method="post">
               <input type="hidden" name="id" value="{{ entry.id }}" />

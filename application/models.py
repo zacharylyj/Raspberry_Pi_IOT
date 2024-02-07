@@ -27,3 +27,4 @@ class History(db.Model):
     creation_time = db.Column(
         db.DateTime, default=lambda: datetime.utcnow() + timedelta(hours=8)
     )
+    image = db.Column(db.LargeBinary)

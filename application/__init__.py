@@ -2,11 +2,17 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
+from base64 import b64encode
 
 db = SQLAlchemy()
 
 # create the Flask app
 app = Flask(__name__)
+app.jinja_env.filters["b64encode"] = lambda data: (
+    b64encode(data).decode() if data else ""
+)
+
+
 login_manager = LoginManager(app)
 bcrypt = Bcrypt(app)
 # load configuration from config.cfg
